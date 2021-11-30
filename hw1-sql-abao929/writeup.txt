@@ -1,0 +1,48 @@
+PART 3
+The query might not be as efficient as possible because the nested query is dependent on the outer one, which would mean that the inner query runs multiple times. Alternatively, if the inner query were unrelated to the outer query, then it would not have to run depending on the athlete’s division.
+WITH divisions AS  (
+	SELECT division, AVG(performance_score) AS avg
+	FROM school_athletes
+	GROUP BY division)
+SELECT ID, name
+FROM school_athletes LEFT JOIN divisions ON school_athletes.division = divisions.division
+WHERE school='Brown' AND performance_score > avg;
+
+When using SELECT with a wide table, operations could be quite costly since there are so many columns to select, whereas with a tall table, there are only a few, thus making it more efficient. However, if you were to only select a small number of the columns from the wide table, you could eliminate a lot of extraneous data.
+When using WHERE with a tall table, it could also be costly with the same reasoning as SELECT on wide since the tall table has so many rows, using WHERE could end up with a lot of rows. Yet again, if you have a super specific thing to find, in theory you could eliminate a lot of rows from the tall table.
+Overall, it seems better to SELECT from tall and WHERE from wide since in general the operations won't be returning as much.
+
+PART 4
+1. a. What are some identities that might not be represented in this database design?
+Depending on how inclusive the race and gender INTEGER options are, many identities will not be represented in the database. Also pronouns are not included in the schema which means they would be assumed, therefore not representing a lot of identities.
+
+b. How would you modify this schema to represent non-binary genders, or complex and historically erased race identities?
+Through the addition of a pronoun field, and changing the race and gender fields to use TEXT rather than INTEGERS so that people could input their own identities rather than having to choose from a set list. Perhaps the addition of a LegalSex field could be useful as this seems to be a school related thing where that information may be useful for health service purposes. 
+In order to implement these proposed changes:
+ALTER TABLE people
+ADD pronouns TEXT;
+ADD LegalSex BOOLEAN;
+DROP COLUMN race;
+DROP COLUMN gender;
+ADD race TEXT;
+ADD gender TEXT;
+Not sure if you want to preserve the old race and gender data since those may not reflect how people actually. If you were to preserve it, probably join the race and gender INTEGER values with the TEXT versions and add those values to the new race and gender columns.
+Perhaps to process the new entries, lowercase them or at least standardize more common identities like male, female so that there is not too much unnecessary variance. Removing special characters like punctuation and emojis should be safe to do though I honestly can not say for sure if there are any identities where marks like ‘ are used. Perhaps for the proposed pronouns field, standardize it so that pronouns all have the same delimiter , or /
+
+c. With the new proposed design, some pros are that people would feel more included. However, some cons are that it would be more costly since it is more memory intensive to store a TEXT rather than an INTEGER. The addition of new fields would also add to the memory usage. Another con is that anything could be put into the TEXT fields so there is not a great way to standardize things. Perhaps two people could identify the same but their capitalization could be different. These cons though are pretty minimal in comparison to the pros which are that people would be better represented.
+
+2. a. Pros are that people are more included. Cons are that there is not a standardization and there could be variance between two people putting the same thing. Also I would not be surprised if there were a bunch of misspellings.
+b. If people were to freely write these values, they would be TEXT or varchars and anything could be a valid entry. I don’t know how TEXT in sql works with special characters and other languages but that could cause some problems if the system can not accommodate other languages.
+c. Some pros are that it is easier to work with as the data is set in stone and there are not infinite possibilities. Another pro is that INTEGERS are easier to store than TEXT. The major con is that people can not freely express themselves. Also in the case of having an INTEGER but also allowing people to type for Other could lead to a lot of data type issues.
+
+3. 3 questions are:
+a. Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set?
+I remember someone told me a stat for the Pfizer vaccine that for Asians the vaccine was only 75% effective, whereas for white people it was something like 90% effective. I can not verify for sure if that whole paper was accurate or not but essentially what happened was that Pfizer had really small sample sizes for minority groups compared to trials done with white people. This just highlights the importance in using diverse datasets that represent all groups rather than a highly selective representation of the general public.
+
+b. Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?
+This type of question really matters in data collection since there are pretty unethical ways to obtain data. I think Google collected data from homeless people and paid them basically nothing for their data. I believe it was used for facial recognition related stuff so that they could sample minorities since their data sets lacked data for certain groups. Pretty disgusting stuff which needs to be monitored more so that data sets are obtained ethically and represent people fairly.
+
+c. Are there tasks for which the dataset should not be used?
+Don’t know about any real life instances where this question could be applicable, but hypothetically speaking it does not sound good to reuse datasets for different things than intended. Could just lead to inadvertent overfitting and create unintended biases. Generally it seems bad to take things out of context and use them.
+
+4. Something the datasheet system does not directly address is if the providers of the data know explicitly how it will be used, and how companies can ensure that it is distributed appropriately and not misused later on. In order to make sure this happens, companies should have to be more upfront about their usage rather than hiding it in obscenely long terms and conditions. I also liked Andrew Yang’s proposal of the government stepping in to some extent so that people are fairly compensated for the data that big companies take and resell from them.
